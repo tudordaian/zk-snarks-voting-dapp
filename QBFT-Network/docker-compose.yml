@@ -4,7 +4,6 @@ services:
     container_name: besu-node-1
     volumes:
       - ./Node-1/data:/var/lib/besu
-      - ./genesis.json:/var/lib/besu/genesis.json
     ports:
       - "8545:8545"
       - "8546:8546"
@@ -40,7 +39,6 @@ services:
     container_name: besu-node-2
     volumes:
       - ./Node-2/data:/var/lib/besu
-      - ./genesis.json:/var/lib/besu/genesis.json
     ports:
       - "8547:8545"
       - "30304:30303"
@@ -73,7 +71,6 @@ services:
     container_name: besu-node-3
     volumes:
       - ./Node-3/data:/var/lib/besu
-      - ./genesis.json:/var/lib/besu/genesis.json
     ports:
       - "8548:8545"
       - "30305:30303"
@@ -106,7 +103,6 @@ services:
     container_name: besu-node-4
     volumes:
       - ./Node-4/data:/var/lib/besu
-      - ./genesis.json:/var/lib/besu/genesis.json
     ports:
       - "8549:8545"
       - "30306:30303"
