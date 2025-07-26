@@ -1,0 +1,128 @@
+.admin-dashboard-container,
+.admin-dashboard-container * {
+  font-family: 'Courier New', monospace;
+}
+
+.admin-dashboard-container {
+  background-color: #292929;
+  border-radius: 0;
+  padding: 16px 16px 80px 16px;
+  margin: 0;
+  box-shadow: none;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.admin-dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 20px;
+}
+
+.admin-dashboard-title {
+  color: rgb(103, 103, 255);
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  text-align: left;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #b1b1b1;
+}
+
+.create-election-form {
+  background: #363636;
+  border: 1px solid #b1b1b1;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.create-election-title {
+  color: rgb(103, 103, 255);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-label {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  background: #292929;
+  color: #ffffff;
+  border: 1px solid #b1b1b1;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: rgb(103, 103, 255);
+  box-shadow: 0 0 0 0.2rem rgba(129, 120, 255, 0.25);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.proposal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.proposal-title {
+  color: rgb(103, 103, 255);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.file-selected {
+  font-size: 12px;
+  color: #b1b1b1;
+  margin-top: 5px;
+}
+
+.form-message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-message.success {
+  background: #363636;
+  color: #28a746d7;
+  border: 1px solid #28a745;
+}
+
+.form-message.error {
+  background: #363636;
+  color: #faa80f;
+  border: 1px solid #dc3545;
+}

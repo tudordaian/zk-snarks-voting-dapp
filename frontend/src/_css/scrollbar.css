@@ -1,0 +1,45 @@
+
+.left-panel::-webkit-scrollbar,
+.right-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.left-panel::-webkit-scrollbar-track,
+.right-panel::-webkit-scrollbar-track {
+  display: none;
+}
+
+.left-panel::-webkit-scrollbar-thumb,
+.right-panel::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+.left-panel::-webkit-scrollbar-thumb:hover,
+.right-panel::-webkit-scrollbar-thumb:hover {
+  display: none;
+}
+
+.admin-dashboard-container,
+.election-list-container,
+.election-container,
+.identity-management-container,
+.login-container,
+.create-election-form,
+.admin-dashboard-content,
+.election-list-content,
+.proposals-section {
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+
+.admin-dashboard-container::-webkit-scrollbar,
+.election-list-container::-webkit-scrollbar,
+.election-container::-webkit-scrollbar,
+.identity-management-container::-webkit-scrollbar,
+.login-container::-webkit-scrollbar,
+.create-election-form::-webkit-scrollbar,
+.admin-dashboard-content::-webkit-scrollbar,
+.election-list-content::-webkit-scrollbar,
+.proposals-section::-webkit-scrollbar {
+  display: none; 
+}

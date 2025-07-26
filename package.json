@@ -1,0 +1,9 @@
+{
+  "name": "CityProjectPoolLedger Dapp",
+  "version": "1.0.0",
+  "description": "City Project Pool Ledger DApp - Root workspace",
+  "private": true,
+  "dependencies": {
+    "firebase-admin": "^13.4.0"
+  }
+}

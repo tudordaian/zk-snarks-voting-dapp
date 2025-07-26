@@ -1,0 +1,143 @@
+.election-list-container,
+.election-list-container * {
+  font-family: 'Courier New', monospace;
+}
+
+.election-list-container {
+  background-color: #292929;
+  border-radius: 0;
+  padding: 16px 16px 80px 16px;
+  margin: 0;
+  box-shadow: none;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.election-list-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 20px;
+}
+
+.election-list-title {
+  color: #ffffff;
+  font-size: 22px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: left;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #b1b1b1;
+}
+
+.election-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.election-card {
+  background: #363636;
+  border: 1px solid #b1b1b1;
+  border-radius: 8px;
+  padding-bottom: 12px;
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.election-card.clickable-card {
+  cursor: pointer;
+}
+
+.election-card:hover {
+  background: #404040;
+}
+
+.election-card-header {
+  display: block;
+}
+
+.election-card-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 8px 0 2px 0;
+}
+
+.election-card-details {
+  color: #ffffff;
+  font-size: 14px;
+  margin: 2px 0;
+}
+
+.election-card-details strong {
+  color: rgb(103, 103, 255);
+}
+
+.election-details-grid {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr;
+  grid-template-rows: minmax(24px, auto) minmax(24px, auto) minmax(24px, auto);
+  align-items: center;
+}
+
+.election-details-grid .election-card-details {
+  margin: 0;
+  text-align: left;
+  margin-left: 20px;
+}
+
+.election-details-grid .election-timing {
+  text-align: left;
+  margin-left: 20px;
+  color: #b1b1b1;
+  font-size: 13px;
+  grid-column: span 2;
+}
+
+.election-timing {
+  color: #b1b1b1;
+  font-size: 13px;
+  margin: 0;
+}
+
+.pending-proposals {
+  color: #faa80f;
+  font-size: 13px;
+  font-weight: bold;
+  margin: 4px 0 0 0;
+}
+
+.election-status-message {
+  background: #363636;
+  border: 1px solid #b1b1b1;
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.election-status-message.success {
+  color: #28a746d7;
+  border-color: #28a745;
+}
+
+.election-status-message.error {
+  color: #faa80f;
+  border-color: #dc3545;
+}
+
+.no-elections {
+  color: #b1b1b1;
+  text-align: center;
+  padding: 40px 20px;
+  font-style: italic;
+}

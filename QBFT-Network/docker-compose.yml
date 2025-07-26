@@ -1,0 +1,219 @@
+services:
+  besu-node-1:
+    image: hyperledger/besu:latest
+    container_name: besu-node-1
+    volumes:
+      - ./Node-1/data:/var/lib/besu
+      - ./genesis.json:/var/lib/besu/genesis.json
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+      - "30303:30303"
+    command: [
+      "--data-path=/var/lib/besu",
+      "--genesis-file=/var/lib/besu/genesis.json",
+      "--rpc-http-enabled",
+      "--rpc-http-api=ETH,NET,QBFT,WEB3,TRACE,DEBUG",
+      "--rpc-ws-enabled",
+      "--rpc-ws-api=ETH,NET,QBFT,WEB3,TRACE,DEBUG",
+      "--rpc-ws-host=0.0.0.0",
+      "--rpc-ws-port=8546",
+      "--host-allowlist=*",
+      "--rpc-http-cors-origins=all",
+      "--rpc-http-host=0.0.0.0",
+      "--p2p-host=0.0.0.0",
+      "--profile=ENTERPRISE",
+      "--sync-mode=FULL",
+      "--min-gas-price=0",
+      "--tx-pool-price-bump=0",
+      "--rpc-max-logs-range=0",
+      "--rpc-http-max-active-connections=200",
+      "--rpc-ws-max-active-connections=200",
+      "--rpc-http-max-batch-size=1000"
+    ]
+    networks:
+      besu-network:
+        ipv4_address: 172.20.0.10
+
+  besu-node-2:
+    image: hyperledger/besu:latest
+    container_name: besu-node-2
+    volumes:
+      - ./Node-2/data:/var/lib/besu
+      - ./genesis.json:/var/lib/besu/genesis.json
+    ports:
+      - "8547:8545"
+      - "30304:30303"
+    command: [
+      "--data-path=/var/lib/besu",
+      "--genesis-file=/var/lib/besu/genesis.json",
+      "--bootnodes=enode://4a7dc544e7d329bfddc84837c651194cb57f2fab325d2ef05360399f2004baaa77ac03acaa240da5f9a7779eb66486dcaa7f6e06a521d2066f1c964e61c43c29@172.20.0.10:30303",
+      "--p2p-port=30303",
+      "--rpc-http-enabled",
+      "--rpc-http-api=ETH,NET,QBFT,WEB3",
+      "--host-allowlist=*",
+      "--rpc-http-cors-origins=all",
+      "--rpc-http-host=0.0.0.0",
+      "--rpc-http-port=8545",
+      "--p2p-host=0.0.0.0",
+      "--profile=ENTERPRISE",
+      "--sync-mode=FULL",
+      "--min-gas-price=0",
+      "--tx-pool-price-bump=0",
+      "--rpc-max-logs-range=0"
+    ]
+    depends_on:
+      - besu-node-1
+    networks:
+      besu-network:
+        ipv4_address: 172.20.0.11
+
+  besu-node-3:
+    image: hyperledger/besu:latest
+    container_name: besu-node-3
+    volumes:
+      - ./Node-3/data:/var/lib/besu
+      - ./genesis.json:/var/lib/besu/genesis.json
+    ports:
+      - "8548:8545"
+      - "30305:30303"
+    command: [
+      "--data-path=/var/lib/besu",
+      "--genesis-file=/var/lib/besu/genesis.json",
+      "--bootnodes=enode://4a7dc544e7d329bfddc84837c651194cb57f2fab325d2ef05360399f2004baaa77ac03acaa240da5f9a7779eb66486dcaa7f6e06a521d2066f1c964e61c43c29@172.20.0.10:30303",
+      "--p2p-port=30303",
+      "--rpc-http-enabled",
+      "--rpc-http-api=ETH,NET,QBFT,WEB3",
+      "--host-allowlist=*",
+      "--rpc-http-cors-origins=all",
+      "--rpc-http-host=0.0.0.0",
+      "--rpc-http-port=8545",
+      "--p2p-host=0.0.0.0",
+      "--profile=ENTERPRISE",
+      "--sync-mode=FULL",
+      "--min-gas-price=0",
+      "--tx-pool-price-bump=0",
+      "--rpc-max-logs-range=0"
+    ]
+    depends_on:
+      - besu-node-1
+    networks:
+      besu-network:
+        ipv4_address: 172.20.0.12
+
+  besu-node-4:
+    image: hyperledger/besu:latest
+    container_name: besu-node-4
+    volumes:
+      - ./Node-4/data:/var/lib/besu
+      - ./genesis.json:/var/lib/besu/genesis.json
+    ports:
+      - "8549:8545"
+      - "30306:30303"
+    command: [
+      "--data-path=/var/lib/besu",
+      "--genesis-file=/var/lib/besu/genesis.json",
+      "--bootnodes=enode://4a7dc544e7d329bfddc84837c651194cb57f2fab325d2ef05360399f2004baaa77ac03acaa240da5f9a7779eb66486dcaa7f6e06a521d2066f1c964e61c43c29@172.20.0.10:30303",
+      "--p2p-port=30303",
+      "--rpc-http-enabled",
+      "--rpc-http-api=ETH,NET,QBFT,WEB3",
+      "--host-allowlist=*",
+      "--rpc-http-cors-origins=all",
+      "--rpc-http-host=0.0.0.0",
+      "--rpc-http-port=8545",
+      "--p2p-host=0.0.0.0",
+      "--profile=ENTERPRISE",
+      "--sync-mode=FULL",
+      "--min-gas-price=0",
+      "--tx-pool-price-bump=0",
+      "--rpc-max-logs-range=0"
+    ]
+    depends_on:
+      - besu-node-1
+    networks:
+      besu-network:
+        ipv4_address: 172.20.0.13
+
+  postgres:
+    image: postgres:14
+    container_name: blockscout-postgres
+    environment:
+      POSTGRES_DB: blockscout
+      POSTGRES_USER: blockscout
+      POSTGRES_PASSWORD: ceWb1MeLBEeOIfk65gU8EjF8
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      besu-network:
+        ipv4_address: 172.20.0.14
+
+  redis:
+    image: redis:alpine
+    container_name: blockscout-redis
+    ports:
+      - "6379:6379"
+    networks:
+      besu-network:
+        ipv4_address: 172.20.0.15
+
+  blockscout:
+    image: blockscout/blockscout:latest
+    container_name: blockscout
+    restart: unless-stopped
+    command: ["sh", "-c", "sleep 30 && bin/blockscout eval \"Elixir.Explorer.ReleaseTasks.create_and_migrate()\" && bin/blockscout start"]
+    environment:
+      DATABASE_URL: postgresql://blockscout:ceWb1MeLBEeOIfk65gU8EjF8@postgres:5432/blockscout
+      ETHEREUM_JSONRPC_VARIANT: besu
+      ETHEREUM_JSONRPC_HTTP_URL: http://besu-node-1:8545
+      ETHEREUM_JSONRPC_WS_URL: ws://besu-node-1:8546
+      NETWORK: Private Besu Network
+      SUBNETWORK: QBFT
+      LOGO: /images/blockscout_logo.svg
+      LOGO_FOOTER: /images/blockscout_logo.svg
+      COIN: ETH
+      COIN_NAME: Ether
+      SECRET_KEY_BASE: RMgI4C1HSkxsEjdhtGMfwAHfyT6CKWXOgzCboJflfSm4jeAlic52io05KB6mqzc5
+      POOL_SIZE: 20
+      POOL_SIZE_API: 10
+      ECTO_USE_SSL: "false"
+      MIX_ENV: prod
+      CHAIN_ID: 1337
+      DISABLE_INDEXER: "false"
+      DISABLE_WEBAPP: "false"
+      API_V2_ENABLED: "true"
+      PORT: 4000
+      BLOCKSCOUT_HOST: localhost
+      BLOCKSCOUT_PROTOCOL: http
+      ETHEREUM_JSONRPC_HTTP_TIMEOUT: 60000
+      ETHEREUM_JSONRPC_HTTP_POOL_SIZE: 5
+      ETHEREUM_JSONRPC_WS_POOL_SIZE: 5
+      INDEXER_BLOCK_FETCH_INTERVAL: 5000
+      INDEXER_RECEIPTS_BATCH_SIZE: 50
+      INDEXER_RECEIPTS_CONCURRENCY: 2
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - redis
+      - besu-node-1
+    networks:
+      besu-network:
+        ipv4_address: 172.20.0.16
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/api/v1/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+volumes:
+  postgres-data:
+
+networks:
+  besu-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

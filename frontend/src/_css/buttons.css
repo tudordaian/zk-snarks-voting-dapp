@@ -1,0 +1,150 @@
+.btn,
+.action-button,
+.add-proposal-btn,
+.remove-proposal-btn,
+.submit-btn,
+.proposal-action-button,
+.copy-button {
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'Courier New', monospace;
+}
+
+.btn:disabled,
+.action-button:disabled,
+.submit-btn:disabled {
+  background-color: #444444;
+  cursor: not-allowed;
+}
+
+.btn {
+  padding: 8px 12px;
+  margin: 0 5px;
+  background-color: #007bff;
+  color: white;
+}
+
+.btn:disabled {
+  background-color: #ccc;
+}
+
+.btn-danger { background-color: #dc3545; }
+.btn-success { background-color: #28a745; }
+
+/* copy */
+.copy-button {
+  display: block;
+  margin-top: 6px;
+  margin-left: auto;
+  width: fit-content;
+  background-color: #575757;
+  color: rgb(195, 193, 193);
+  padding: 3px 6px;
+  font-size: 10px;
+}
+
+/* action button */
+.action-button {
+  background-color: #575757;
+  color: rgb(195, 193, 193);
+  padding: 8px 16px;
+  font-size: 12px;
+  margin: 4px;
+}
+
+.action-button:hover:not(:disabled) { background-color: #666666; }
+
+.action-button.primary {
+  background-color: rgb(103, 103, 255);
+  color: #ffffff;
+}
+.action-button.primary:hover:not(:disabled) { 
+  background-color: #6b61d9; 
+}
+
+.action-button.danger {
+  background-color: #dc3545;
+  color: #ffffff;
+}
+.action-button.danger:hover:not(:disabled) { 
+  background-color: #c82333;
+}
+
+.action-button.orange {
+  background-color: #FF9800;
+  color: #ffffff;
+}
+.action-button.orange:hover:not(:disabled) { 
+  background-color: #e68900; 
+}
+
+.action-button.gray {
+  background-color: #9E9E9E;
+  color: #ffffff;
+}
+.action-button.gray:hover:not(:disabled) { 
+  background-color: #8a8a8a; 
+}
+
+/* proposal btns */
+.add-proposal-btn {
+  background-color: #28a745;
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.add-proposal-btn:hover { 
+  background-color: #218838; 
+}
+
+.remove-proposal-btn {
+  background-color: #dc3545;
+  color: #ffffff;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.remove-proposal-btn:hover { 
+  background-color: #c82333; 
+}
+
+/* submit */
+.submit-btn {
+  background-color: rgb(103, 103, 255);
+  color: #ffffff;
+  padding: 12px 20px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.submit-btn:hover:not(:disabled) { 
+  background-color: #4b3fd3; 
+}
+
+.proposal-action-button {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.proposal-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: #444444;
+}
+
+.proposal-action-button.accept {
+  background-color: #28a745;
+  color: #ffffff;
+}
+.proposal-action-button.accept:hover:not(:disabled) { 
+  background-color: #218838; 
+}
+
+.proposal-action-button.decline {
+  background-color: #dc3545;
+  color: #ffffff;
+}
+.proposal-action-button.decline:hover:not(:disabled) { 
+  background-color: #c82333; 
+}
