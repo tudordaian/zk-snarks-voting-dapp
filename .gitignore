@@ -1,5 +1,8 @@
-# Firebase private keys and configuration
+# Firebase
 backend/firebase/
+
+# Github
+.github
 
 # Node modules
 node_modules/

@@ -23,8 +23,6 @@ contract ProjectPollLedger {
         bool active;
         bool finalized; // flag pentru a preveni autoapelarea repetata a functiei finalizeElection
         Proposal[] proposals;
-
-        mapping(uint256 => bool) nullifiersUsed; 
     }
 
     struct ElectionView {
@@ -202,7 +200,6 @@ contract ProjectPollLedger {
         require(block.timestamp >= currentElection.startTime, "Election has not started.");
         require(block.timestamp <= currentElection.endTime, "Election has ended.");
         require(proposalIndex < currentElection.proposals.length, "Invalid proposal index.");
-        require(!currentElection.nullifiersUsed[nullifierHash], "Nullifier was already used for this election.");
 
         // message(sau signal) -> alegerea votantului; externalNullifier -> id-ul alegerii
         bytes32 message = keccak256(abi.encode(proposalIndex));   // trebuie hash pt a fi 32 bytes
@@ -218,11 +215,10 @@ contract ProjectPollLedger {
             points: zkProof // uint256[8] --> 8 valori int ce reprezinta proof-ul criptografic
         });
 
-        bool isValidProof = semaphore.verifyProof(GROUP_ID, proofData);
-        require(isValidProof, "Invalid proof");     // pica daca votul e modificat
+        // va arunca eroare daca nullifier-ul a fost deja folosit sau daca votul e modificat
+        semaphore.validateProof(GROUP_ID, proofData);
 
         currentElection.proposals[proposalIndex].voteCount += 1;
-        currentElection.nullifiersUsed[nullifierHash] = true;
 
         emit VoteCasted(electionId, proposalIndex, message, nullifierHash);
     }

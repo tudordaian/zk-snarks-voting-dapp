@@ -18,34 +18,28 @@ export const useVoting = (
     const [voteStatus, setVoteStatus] = useState('');
 
     const getErrorMessage = (error: any): string => {
-        // contract errors
+        if (error.status >= 500) {
+            return "Server error occurred. Please try again.";
+        }
+        
         if (error.status === 409) {
             return error.message || "You have already voted in this election.";
         }
         
-        if (error.message?.includes("You have already voted in this election") ||
-            error.message?.includes("Nullifier was already used")) {
+        if (error.message?.includes("You have already voted in this election")) {
             return "You have already voted in this election.";
         }
         
-        if (error.message?.includes("Election inactive") ||
-            error.message?.includes("not currently active")) {
-            return "This election is not currently active.";
+        if (error.message?.includes("Invalid zero-knowledge proof")) {
+            return "Invalid voting proof.";
         }
         
-        if (error.message?.includes("Election has ended") ||
-            error.message?.includes("already ended")) {
-            return "This election has already ended.";
+        if (error.message?.includes("Identity verification failed")) {
+            return "Identity verification failed.";
         }
         
-        if (error.message?.includes("Election has not started") ||
-            error.message?.includes("not started yet")) {
-            return "This election has not started yet.";
-        }
-        
-        // semaphore errors
-        if (error.message?.includes("Semaphore__MerkleTreeRootIsNotPartOfTheGroup")) {
-            return "Identity verification failed. Please try again.";
+        if (error.message?.includes("Smart contract error occurred")) {
+            return "Blockchain error occurred.";
         }
         
         // nonce errors
@@ -53,7 +47,7 @@ export const useVoting = (
             error.message?.includes("Nonce too low") ||
             error.message?.includes("NONCE_EXPIRED") ||
             error.message?.includes("nonce conflict")) {
-            return "Transaction timing conflict. Please try again.";
+            return "Transaction nonce error.";
         }
         
         // user rejection
@@ -61,10 +55,6 @@ export const useVoting = (
             error.message?.includes("User rejected") ||
             error.message?.includes("rejected by user")) {
             return "Transaction was cancelled.";
-        }
-        
-        if (error.status >= 500) {
-            return "Server error occurred. Please try again.";
         }
         
         // fallback

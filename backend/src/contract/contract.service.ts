@@ -114,28 +114,38 @@ export class ContractService implements OnModuleInit {
             this.logger.log(`Vote successful for election ${electionId}, TX: ${txReceipt.hash}`);
             return txReceipt;
         } catch (error: any) {
-            if (error.code === 'CALL_EXCEPTION' && error.reason) {
-                if (error.reason.includes('Nullifier was already used')) {
-                    this.logger.warn(`Duplicate vote attempt on election ${electionId}: ${error.reason}`);
+            if (error.code === 'CALL_EXCEPTION') {
+                // Semaphore errors
+                if (error.data === '0x208b15e8') {
+                    this.logger.warn(`Duplicate vote attempt on election ${electionId}: Semaphore__YouAreUsingTheSameNullifierTwice`);
                     const duplicateError = new Error('You have already voted in this election');
                     duplicateError.name = 'DuplicateVoteError';
                     throw duplicateError;
                 }
                 
-                const userError = new Error(error.reason);
-                userError.name = 'VotingError';
-                throw userError;
+                if (error.data === '0x4aa6bc40') {
+                    this.logger.warn(`Invalid proof on election ${electionId}: Semaphore__InvalidProof`);
+                    const invalidProofError = new Error('Invalid zero-knowledge proof');
+                    invalidProofError.name = 'VotingError';
+                    throw invalidProofError;
+                }
+                
+                if (error.data === '0x4d329586') {
+                    this.logger.warn(`Invalid merkle root on election ${electionId}: Semaphore__MerkleTreeRootIsNotPartOfTheGroup`);
+                    const merkleError = new Error('Identity verification failed.');
+                    merkleError.name = 'VotingError';
+                    throw merkleError;
+                }
+                
+                this.logger.error(`Unknown custom error on election ${electionId}: data=${error.data}`);
+                const genericError = new Error('Smart contract error occurred.');
+                genericError.name = 'VotingError';
+                throw genericError;
             }
             
-            if (error.reason && error.reason.includes('Invalid proof')) {
-                this.logger.error(`PROOF VALIDATION FAILED for election ${electionId}:`);
-                this.logger.error(`- Nullifier: ${nullifierHash}`);
-                this.logger.error(`- Merkle root used: ${merkleTreeRoot}`);
-            }
-            
+            // other
             this.logger.error(`Failed to vote on election ${electionId}:`, error);
             const errorMessage = error.reason || error.message || 'Unknown error during vote.';
-            this.logger.error(`Unexpected error in voteZkp: ${errorMessage}`);
             throw new InternalServerErrorException(errorMessage);
         }
     }
