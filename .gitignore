@@ -33,3 +33,7 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+# QBFT Network runtime data
+QBFT-Network/Node-*/data/caches/
+QBFT-Network/Node-*/data/database/
