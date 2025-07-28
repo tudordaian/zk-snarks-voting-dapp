@@ -7,22 +7,30 @@ const IdentityManagement: React.FC = () => {
     const [status, setStatus] = useState<string>('');
     const [error, setError] = useState<string>('');
     const [isRegistered, setIsRegistered] = useState<boolean>(false);
+    const [groupId, setGroupId] = useState<number | null>(null);
     const [copiedField, setCopiedField] = useState<string>('');
 
     useEffect(() => {
         const checkRegistration = async () => {
             if (!cnp || !semaphoreIdentity) {
                 setIsRegistered(false);
+                setGroupId(null);
                 return;
             }
             
             try {
-                const response = await apiService.getIdentityCommitmentByCnp(cnp);
-                const registered = response.success && 
-                                 response.data?.identityCommitment === semaphoreIdentity.commitment.toString();
-                setIsRegistered(registered);
+                const response = await apiService.getIdentityMappingByCnp(cnp);
+                if (response.success && response.data) {
+                    const registered = response.data.identityCommitment === semaphoreIdentity.commitment.toString();
+                    setIsRegistered(registered);
+                    setGroupId(response.data.groupId);
+                } else {
+                    setIsRegistered(false);
+                    setGroupId(null);
+                }
             } catch {
                 setIsRegistered(false);
+                setGroupId(null);
             }
         };
         checkRegistration();
@@ -64,6 +72,10 @@ const IdentityManagement: React.FC = () => {
             if (response.data?.transactionHash) {
                 setRegistrationTxHash(response.data.transactionHash);
             }
+            
+            if (response.data?.groupId !== undefined) {
+                setGroupId(response.data.groupId);
+            }
         } catch (e: any) {
             console.error("Error registering identity:", e);
             const errorMessage = e.status === 409 ? `Registration conflict: ${e.message}` :
@@ -101,15 +113,28 @@ const IdentityManagement: React.FC = () => {
                 <div className="identity-display-section">
                     <h4>Your Semaphore Identity:</h4>
                     {error && <p className="error-message">{error}</p>}
-                    <p className="info-text">
-                        <strong>CNP:</strong> {currentUser}
-                        <button 
-                            className={`copy-button ${copiedField === 'cnp' ? 'copied' : ''}`}
-                            onClick={() => handleCopyToClipboard(currentUser, 'cnp')}
-                        >
-                            Copy
-                        </button>
-                    </p>
+                    <div className="cnp-group-row">
+                        <div className="cnp-group-item">
+                            <strong>CNP:</strong> {currentUser}
+                            <button 
+                                className={`copy-button ${copiedField === 'cnp' ? 'copied' : ''}`}
+                                onClick={() => handleCopyToClipboard(currentUser, 'cnp')}
+                            >
+                                Copy
+                            </button>
+                        </div>
+                        <div className="cnp-group-item">
+                            <strong>Group ID:</strong> {groupId !== null ? groupId : 'Not assigned'}
+                            {groupId !== null && (
+                                <button 
+                                    className={`copy-button ${copiedField === 'groupId' ? 'copied' : ''}`}
+                                    onClick={() => handleCopyToClipboard(groupId.toString(), 'groupId')}
+                                >
+                                    Copy
+                                </button>
+                            )}
+                        </div>
+                    </div>
                     
                     <p className="info-text">
                         <strong>Identity Commitment (public):</strong> {semaphoreIdentity.commitment}

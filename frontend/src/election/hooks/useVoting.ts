@@ -83,17 +83,26 @@ export const useVoting = (
         setVoteError('');
 
         try {
-            setVoteStatus('Verifying identity membership...');
-            const groupMembers = await contractService.getSemaphoreGroupMembers();
+            setVoteStatus('Fetching identity mapping...');
+            const identityMapping = await apiService.getIdentityMappingByCnp(cnp);
+            if (!identityMapping.success || !identityMapping.data) {
+                throw new Error("Could not fetch identity mapping for CNP.");
+            }
+            
+            const { groupId } = identityMapping.data;
+            console.log("User belongs to group:", groupId);
+
+            setVoteStatus('Verifying identity membership in group...');
+            const groupMembers = await contractService.getSemaphoreGroupMembers(groupId);
             if (!groupMembers || groupMembers.length === 0) {
-                throw new Error("Could not fetch group members or the group is empty.");
+                throw new Error(`Could not fetch group members for group ${groupId} or the group is empty.`);
             }
             if (!groupMembers.includes(semaphoreIdentity.commitment.toString())) {
                 throw new Error("Your identity commitment is not part of the retrieved group members.");
             }
 
             setVoteStatus('Fetching current merkle tree root from contract...');
-            const currentMerkleRoot = await contractService.getCurrentMerkleTreeRoot();
+            const currentMerkleRoot = await contractService.getCurrentMerkleTreeRoot(groupId);
             console.log("Fetched merkle root:", currentMerkleRoot);
 
             setVoteStatus('Generating ZK proof with current contract state...');
@@ -112,6 +121,7 @@ export const useVoting = (
 
             const votePayload = {
                 proposalIndex: selectedProposalIndex,
+                groupId: groupId,
                 merkleTreeRoot: currentMerkleRoot, 
                 nullifierHash: generatedProof.nullifier,
                 proof: generatedProof.points,

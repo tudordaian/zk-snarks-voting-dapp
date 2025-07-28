@@ -93,20 +93,21 @@ const checkVotes = async (electionId: string | number): Promise<bigint[]> => {
     }
 };
 
-const getCurrentMerkleTreeRoot = async (): Promise<string> => {
+const getCurrentMerkleTreeRoot = async (localGroupId: number): Promise<string> => {
     const contract = getContract();
     try {
-        const semaphoreAddress = await contract.semaphore();
+        const semaphoreGroupId = await contract.getSemaphoreGroupId(localGroupId);
+        console.log(`Getting merkle root for local group ${localGroupId} (Semaphore group ${semaphoreGroupId})`);
         
-        const provider = new ethers.JsonRpcProvider(RPC_URL);
+        const semaphoreAddress = await contract.semaphore();
         const semaphoreContract = new Contract(
             semaphoreAddress,
             SemaphoreArtifact.abi,
-            provider
+            contract.runner
         );
         
-        const GROUP_ID = 0;
-        const merkleTreeRoot = await semaphoreContract.getMerkleTreeRoot(GROUP_ID);
+        const merkleTreeRoot = await semaphoreContract.getMerkleTreeRoot(semaphoreGroupId);
+        console.log(`Merkle root for Semaphore group ${semaphoreGroupId}:`, merkleTreeRoot.toString());
         return merkleTreeRoot.toString();
     } catch (error) {
         console.error('Error fetching merkle tree root:', error);
@@ -114,19 +115,20 @@ const getCurrentMerkleTreeRoot = async (): Promise<string> => {
     }
 };
 
-const getSemaphoreGroupMembers = async (): Promise<string[]> => {
+const getSemaphoreGroupMembers = async (localGroupId: number = 0): Promise<string[]> => {
     const contract = getContract();
     try {
+        const semaphoreGroupId = await contract.getSemaphoreGroupId(localGroupId);
+        console.log(`Local group ${localGroupId} maps to Semaphore group ${semaphoreGroupId}`);
+        
         const semaphoreAddress = await contract.semaphore();
-        const provider = new ethers.JsonRpcProvider(RPC_URL);
         const semaphoreContract = new Contract(
             semaphoreAddress,
             SemaphoreArtifact.abi,
-            provider
+            contract.runner
         );
         
-        const GROUP_ID = 0;
-        const filter = semaphoreContract.filters.MemberAdded(GROUP_ID);
+        const filter = semaphoreContract.filters.MemberAdded(semaphoreGroupId);
         const events = await semaphoreContract.queryFilter(filter);
         
         const members = events.map(event => {
@@ -137,6 +139,7 @@ const getSemaphoreGroupMembers = async (): Promise<string[]> => {
             return null;
         }).filter(commitment => commitment !== null) as string[];
         
+        console.log(`Found ${members.length} members in Semaphore group ${semaphoreGroupId}:`, members);
         return members;
     } catch (error) {
         console.error('Error fetching group members:', error);
@@ -144,15 +147,25 @@ const getSemaphoreGroupMembers = async (): Promise<string[]> => {
     }
 };
 
+const getSemaphoreGroupId = async (localGroupId: number): Promise<number> => {
+    const contract = getContract();
+    try {
+        const semaphoreGroupId = await contract.getSemaphoreGroupId(localGroupId);
+        return Number(semaphoreGroupId);
+    } catch (error) {
+        console.error(`Error getting Semaphore group ID for local group ${localGroupId}:`, error);
+        throw handleContractError(error, 'get Semaphore group ID');
+    }
+};
+
 const getGroupSize = async (): Promise<number> => {
     const contract = getContract();
     try {
         const semaphoreAddress = await contract.semaphore();
-        const provider = new ethers.JsonRpcProvider(RPC_URL);
         const semaphoreContract = new Contract(
             semaphoreAddress,
             SemaphoreArtifact.abi,
-            provider
+            contract.runner
         );
         
         const GROUP_ID = 0;
@@ -404,5 +417,6 @@ export const contractService = {
     getPendingProposalCount,
     getCurrentMerkleTreeRoot,
     getSemaphoreGroupMembers,
+    getSemaphoreGroupId,
     getGroupSize,
 };

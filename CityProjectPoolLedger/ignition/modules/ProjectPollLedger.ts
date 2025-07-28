@@ -16,10 +16,6 @@ export default buildModule('ProjectPollLedger', (m) => {
     }
   );
 
-  m.call(semaphore, 'createGroup()', [], { 
-    id: 'CreateSemaphoreGroup0ForPPL', 
-  });
-
   const projectPollLedger = m.contract('ProjectPollLedger', [semaphore]);  
 
   return { poseidonT3, semaphoreVerifier, semaphore, projectPollLedger };

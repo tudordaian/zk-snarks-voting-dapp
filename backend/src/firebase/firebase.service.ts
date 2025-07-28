@@ -41,17 +41,36 @@ export class FirebaseService implements OnModuleInit {
         ).toString('hex');
     }
 
-    async storeCnpIdentityMapping(cnp: string, identityCommitment: string): Promise<void> {
+    async storeCnpIdentityMapping(cnp: string, identityCommitment: string, groupId: number): Promise<void> {
         const hashedCnp = this.hashCnp(cnp);
-        const data = { identityCommitment };
+        const data = { identityCommitment, groupId };
         await this.db.collection('cnpIdentityMappings').doc(hashedCnp).set(data);
-        this.logger.log(`Stored identity mapping for CNP.`);
+        this.logger.log(`Stored identity mapping for CNP with groupId: ${groupId}.`);
     }
 
     async getIdentityCommitmentByCnp(cnp: string): Promise<string | null> {
         const hashedCnp = this.hashCnp(cnp);
         const doc = await this.db.collection('cnpIdentityMappings').doc(hashedCnp).get();
         return doc.exists ? doc.data()?.identityCommitment : null;
+    }
+
+    async getGroupIdByCnp(cnp: string): Promise<number | null> {
+        const hashedCnp = this.hashCnp(cnp);
+        const doc = await this.db.collection('cnpIdentityMappings').doc(hashedCnp).get();
+        return doc.exists ? doc.data()?.groupId : null;
+    }
+
+    async getIdentityMappingByCnp(cnp: string): Promise<{identityCommitment: string, groupId: number} | null> {
+        const hashedCnp = this.hashCnp(cnp);
+        const doc = await this.db.collection('cnpIdentityMappings').doc(hashedCnp).get();
+        if (doc.exists) {
+            const data = doc.data()!;
+            return {
+                identityCommitment: data.identityCommitment,
+                groupId: data.groupId
+            };
+        }
+        return null;
     }
 
 }

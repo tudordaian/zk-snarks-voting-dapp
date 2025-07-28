@@ -58,8 +58,13 @@ contract ProjectPollLedger {
     mapping(uint256 => uint256) public pendingProposalCounts; // electionId => count
     
     ISemaphore public semaphore;
-    uint256 public constant GROUP_ID = 0;  // merkle id 
-    uint256 public constant MERKLE_TREE_DEPTH = 20; 
+    uint256 public constant MERKLE_TREE_DEPTH = 2; 
+    uint256 public constant MAX_MEMBERS_PER_TREE = 4;
+    
+    uint256 public currentGroupId = 0;
+    uint256 public currentGroupSize = 0;
+    
+    mapping(uint256 => uint256) public groupSizes; // groupId => size 
 
     event ElectionCreated(
         uint256 electionId,
@@ -181,15 +186,30 @@ contract ProjectPollLedger {
         emit ElectionDeleted(electionId, electionName);
     }
 
-    // adaugarea unui identity commitment al unui votant in merkle tree
-    function addMember(uint256 identityCommitment) public onlyOwner { 
-        semaphore.addMember(GROUP_ID, identityCommitment);
-        console.log("identityCommitment %s added to GROUP_ID %s", identityCommitment, GROUP_ID);
+    // adaugarea unui identity commitment al unui votant in merkle forest
+    function addMember(uint256 identityCommitment) public onlyOwner returns (uint256) { 
+        // verificare daca grupul e full sau daca exista
+        if (currentGroupSize >= MAX_MEMBERS_PER_TREE || groupSizes[currentGroupId] == 0) {
+            if (currentGroupSize >= MAX_MEMBERS_PER_TREE) {
+                currentGroupId++;
+                currentGroupSize = 0;
+            }
+            semaphore.createGroup();
+            console.log("Created group %s", currentGroupId);
+        }
+        
+        semaphore.addMember(currentGroupId, identityCommitment);
+        groupSizes[currentGroupId]++;
+        currentGroupSize++;
+        
+        console.log("identityCommitment %s added to GROUP_ID %s", identityCommitment, currentGroupId);
+        return currentGroupId;
     }
 
     function vote(
         uint256 electionId,
         uint proposalIndex,
+        uint256 groupId,       
         uint256 merkleTreeRoot, // pt zkProof
         uint256 nullifierHash,  // pt zkProof
         uint256[8] memory zkProof   // format Groth16 [Ax, Ay, Bx1, Bx2, By1, By2 Cx, Cy] 
@@ -200,6 +220,7 @@ contract ProjectPollLedger {
         require(block.timestamp >= currentElection.startTime, "Election has not started.");
         require(block.timestamp <= currentElection.endTime, "Election has ended.");
         require(proposalIndex < currentElection.proposals.length, "Invalid proposal index.");
+        require(groupId <= currentGroupId, "Invalid group ID.");
 
         // message(sau signal) -> alegerea votantului; externalNullifier -> id-ul alegerii
         bytes32 message = keccak256(abi.encode(proposalIndex));   // trebuie hash pt a fi 32 bytes
@@ -216,7 +237,7 @@ contract ProjectPollLedger {
         });
 
         // va arunca eroare daca nullifier-ul a fost deja folosit sau daca votul e modificat
-        semaphore.validateProof(GROUP_ID, proofData);
+        semaphore.validateProof(groupId, proofData);
 
         currentElection.proposals[proposalIndex].voteCount += 1;
 
@@ -481,5 +502,27 @@ contract ProjectPollLedger {
         }
 
         return unprocessedCount;
+    }
+
+    // group view
+    
+    function getCurrentGroupId() public view returns (uint256) {
+        return currentGroupId;
+    }
+
+    function getCurrentGroupSize() public view returns (uint256) {
+        return currentGroupSize;
+    }
+
+    function getGroupSize(uint256 groupId) public view returns (uint256) {
+        return groupSizes[groupId];
+    }
+
+    function getTotalGroups() public view returns (uint256) {
+        return currentGroupId + 1;
+    }
+
+    function getSemaphoreGroupId(uint256 localGroupId) public pure returns (uint256) {
+        return localGroupId;
     }
 }

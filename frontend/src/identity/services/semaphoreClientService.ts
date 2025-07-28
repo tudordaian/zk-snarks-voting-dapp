@@ -4,7 +4,7 @@ import { generateProof, SemaphoreProof } from '@semaphore-protocol/proof';
 import { ethers } from 'ethers';
 
 export const SEMAPHORE_GROUP_ID = "0";
-export const MERKLE_TREE_DEPTH = 20;
+export const MERKLE_TREE_DEPTH = 2;
 
 // generare deterministica a identitatii 
 export const generateSemaphoreIdentity = (secret: string): Identity => {

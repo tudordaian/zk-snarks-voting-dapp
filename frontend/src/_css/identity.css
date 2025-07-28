@@ -157,3 +157,33 @@
   border-color: rgb(103, 103, 255);
   box-shadow: 0 0 0 0.2rem rgba(129, 120, 255, 0.25);
 }
+
+.cnp-group-row {
+  display: flex;
+  gap: 8px;
+  margin: 6px 1px;
+}
+
+.cnp-group-item {
+  flex: 1;
+  background: #363636;
+  color: #ffffff;
+  border: 1px solid #b1b1b1;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  line-height: 0.7;
+  word-break: break-all;
+  text-align: left;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.cnp-group-item strong {
+  color: rgb(103, 103, 255);
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 14px;
+}

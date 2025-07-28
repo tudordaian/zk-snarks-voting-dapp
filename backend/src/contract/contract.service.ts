@@ -85,23 +85,22 @@ export class ContractService implements OnModuleInit {
     async voteZkp(
         electionId: number,
         proposalIndex: number,
+        groupId: number,
         merkleTreeRoot: string,
         nullifierHash: string,
         proof: string[],
     ): Promise<TransactionReceipt> {
-        this.logger.log(`Processing ZKP vote tx for election ${electionId} with NULLIFIER ${nullifierHash}`);
+        this.logger.log(`Processing ZKP vote tx for election ${electionId} with NULLIFIER ${nullifierHash} from GROUP ${groupId}`);
         this.logger.log(`Merkle root used for vote: ${merkleTreeRoot}`);
         
         try {
-            const currentNonce = await this.provider.getTransactionCount(this.ownerWallet.address, 'latest');
-            
             const tx = await this.projectPollLedgerContract.vote(
                 electionId,
                 proposalIndex,
+                groupId,
                 merkleTreeRoot,
                 nullifierHash,
-                proof,
-                { nonce: currentNonce }
+                proof
             );
             
             this.logger.log(`Vote transaction sent, hash: ${tx.hash}, waiting for confirmation...`);
@@ -152,8 +151,7 @@ export class ContractService implements OnModuleInit {
 
     async startElection(electionId: number) {
         try {
-            const currentNonce = await this.provider.getTransactionCount(this.ownerWallet.address, 'latest');
-            const tx = await this.projectPollLedgerContract.startElection(electionId, { nonce: currentNonce });
+            const tx = await this.projectPollLedgerContract.startElection(electionId);
             await tx.wait();
             this.logger.log(`Election ${electionId} started.`);
         } catch (error: any) {
@@ -163,8 +161,7 @@ export class ContractService implements OnModuleInit {
 
     async finalizeElection(electionId: number) {
         try {
-            const currentNonce = await this.provider.getTransactionCount(this.ownerWallet.address, 'latest');
-            const tx = await this.projectPollLedgerContract.finalizeElection(electionId, { nonce: currentNonce });
+            const tx = await this.projectPollLedgerContract.finalizeElection(electionId);
             await tx.wait();
             this.logger.log(`Election ${electionId} finalized.`);
         } catch (error: any) {
@@ -172,60 +169,79 @@ export class ContractService implements OnModuleInit {
         }
     }
     
-    async addMember(identityCommitment: string): Promise<string> {
-        const GROUP_ID = 0;
-        this.logger.log(`Adding member with ID COMMITMENT ${identityCommitment} to GROUP_ID ${GROUP_ID}.`);
+    async addMember(identityCommitment: string): Promise<{transactionHash: string, groupId: number}> {
+        this.logger.log(`Adding member with ID COMMITMENT ${identityCommitment} to merkle forest.`);
             
         try {
-            const currentNonce = await this.provider.getTransactionCount(this.ownerWallet.address, 'latest');
-            this.logger.log(`Calling semaphoreContract.addMember with GROUP_ID: ${GROUP_ID}, commitment: ${identityCommitment}, nonce: ${currentNonce}`);
+            this.logger.log(`Calling projectPollLedgerContract.addMember with commitment: ${identityCommitment}`);
             
-            const tx = await this.semaphoreContract.addMember(GROUP_ID, identityCommitment, {
-                nonce: currentNonce
-            });
+            const tx = await this.projectPollLedgerContract.addMember(identityCommitment);
             this.logger.log(`addMember transaction sent, hash: ${tx.hash}, waiting for confirmation...`);
             
             const receipt = await tx.wait();
-            this.logger.log(`Member added successfully. TX HASH: ${tx.hash}, Block: ${receipt.blockNumber}.`);
-            return tx.hash;
+            
+
+            const finalGroupId = await this.projectPollLedgerContract.getCurrentGroupId();
+
+            this.logger.log(`Member added successfully. TX HASH: ${tx.hash}, Block: ${receipt.blockNumber}, Group ID: ${finalGroupId}.`);
+            return {
+                transactionHash: tx.hash,
+                groupId: Number(finalGroupId)
+            };
         } catch (error: any) {
             this.logger.error(`Error in addMember for ${identityCommitment}:`, error);
             this.handleContractError(error, 'add member', `${identityCommitment}`);
         }
     }
-
+    
     async registerIdentityWithCnp(cnp: string, identityCommitment: string):
-        Promise<{message: string, identityCommitmentAdded: boolean, transactionHash?: string}> {
+        Promise<{message: string, identityCommitmentAdded: boolean, transactionHash?: string, groupId?: number}> {
         this.logger.log(`Registering CNP: ${cnp} with identityCommitment: ${identityCommitment}`);
 
-        const existingCommitment = await this.firebaseService.getIdentityCommitmentByCnp(cnp);
-        if (existingCommitment) {
-            return existingCommitment === identityCommitment 
-                ? { message: 'CNP already registered with this identity.', identityCommitmentAdded: false }
+        const existingMapping = await this.firebaseService.getIdentityMappingByCnp(cnp);
+        if (existingMapping) {
+            return existingMapping.identityCommitment === identityCommitment 
+                ? { 
+                    message: 'CNP already registered with this identity.', 
+                    identityCommitmentAdded: false,
+                    groupId: existingMapping.groupId
+                }
                 : (() => { 
                     throw new ConflictException(`CNP ${cnp} is already associated with a different identityCommitment.`); 
                 })();
         }
 
         let transactionHash: string | undefined;
+        let groupId: number | undefined;
         try {
-            transactionHash = await this.addMember(identityCommitment);
+            const result = await this.addMember(identityCommitment);
+            transactionHash = result.transactionHash;
+            groupId = result.groupId;
         } catch (error: any) {
             if (!error.message?.includes('Identity commitment already exists')) {
                 throw new InternalServerErrorException(`Failed to add identity to Semaphore group: ${error.message}`);
             }
         }
 
-        await this.firebaseService.storeCnpIdentityMapping(cnp, identityCommitment);
+        await this.firebaseService.storeCnpIdentityMapping(cnp, identityCommitment, groupId!);
         return { 
             message: 'Identity successfully registered.', 
             identityCommitmentAdded: true,
-            transactionHash 
+            transactionHash,
+            groupId
         };
     }
 
     async getCommitmentByCnp(cnp: string): Promise<string | null> {
         return this.firebaseService.getIdentityCommitmentByCnp(cnp);
+    }
+
+    async getGroupIdByCnp(cnp: string): Promise<number | null> {
+        return this.firebaseService.getGroupIdByCnp(cnp);
+    }
+
+    async getIdentityMappingByCnp(cnp: string): Promise<{identityCommitment: string, groupId: number} | null> {
+        return this.firebaseService.getIdentityMappingByCnp(cnp);
     }
 
     private handleContractError(error: any, operation: string, context?: string): never {

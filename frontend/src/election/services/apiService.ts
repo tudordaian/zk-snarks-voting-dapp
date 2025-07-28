@@ -30,6 +30,14 @@ export const apiService = {
         return response.json();
     },
 
+    getIdentityMappingByCnp: async (cnp: string): Promise<{ success: boolean, data?: { identityCommitment: string, groupId: number }, message?: string }> => {
+        const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/contract/identity-mapping/${cnp}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        return response.json();
+    },
+
     voteZkp: async (electionId: string | number, payload: VoteZkpPayload): Promise<any> => {
         const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/contract/${electionId}/vote-zkp`, {
             method: 'POST',

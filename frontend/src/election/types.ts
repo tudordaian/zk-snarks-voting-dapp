@@ -82,6 +82,7 @@ export interface ProposalData {
 
 export interface VoteZkpPayload {
     proposalIndex: number;
+    groupId: number;
     merkleTreeRoot: string;
     nullifierHash: string;
     proof: string[];

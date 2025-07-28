@@ -19,6 +19,7 @@ interface RegisterIdentityDTO {
 
 interface VoteZkpDTO {
     proposalIndex: number;
+    groupId: number;
     merkleTreeRoot: string;
     nullifierHash: string;
     proof: string[];
@@ -47,7 +48,8 @@ export class ContractController {
                 cnp: registerData.cnp,
                 identityCommitment: registerData.identityCommitment,
                 commitmentAddedToGroup: result.identityCommitmentAdded,
-                transactionHash: result.transactionHash
+                transactionHash: result.transactionHash,
+                groupId: result.groupId
             }
         };
     }
@@ -72,6 +74,26 @@ export class ContractController {
         };
     }
 
+    @Get('identity-mapping/:cnp')
+    async getIdentityMappingByCnp(@Param('cnp') cnp: string) {
+        this.logger.log(`Request to get identity mapping for CNP: ${cnp}`);
+        
+        const mapping = await this.contractService.getIdentityMappingByCnp(cnp);
+        if (!mapping) {
+            return {
+                success: false,
+                data: null,
+                message: 'Identity mapping not found for this CNP.'
+            };
+        }
+        
+        return {
+            success: true,
+            data: mapping,
+            message: 'Identity mapping retrieved successfully.'
+        };
+    }
+
     @Post(':electionId/vote-zkp')
     @HttpCode(HttpStatus.OK)
     async voteZkp(@Param('electionId') electionIdStr: string, @Body() voteData: VoteZkpDTO) {
@@ -86,6 +108,7 @@ export class ContractController {
             const txReceipt = await this.contractService.voteZkp(
                 electionId,
                 voteData.proposalIndex,
+                voteData.groupId,
                 voteData.merkleTreeRoot,
                 voteData.nullifierHash,
                 voteData.proof,
