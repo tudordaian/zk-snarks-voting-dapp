@@ -18,6 +18,12 @@ node_modules/
 dist/
 build/
 
+# Hardhat deployment artifacts
+*/ignition/deployments/
+*/artifacts/
+*/cache/
+*/typechain-types/
+
 # IDE files
 .vscode/
 .idea/
