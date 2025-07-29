@@ -1,6 +1,5 @@
 export { 
     generateSemaphoreIdentity, 
-    reconstructIdentityFromSeed, 
     generateSemaphoreProof, 
     createVoteSignal,
     SEMAPHORE_GROUP_ID,
